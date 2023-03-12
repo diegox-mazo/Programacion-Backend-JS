@@ -1,4 +1,5 @@
 const fs = require("fs/promises");
+const cartModel = require('./models/cart.model');
 
 class CartManager{
 
@@ -65,7 +66,7 @@ class CartManager{
         }
     }
 
-    async updateProductInCart(cart_id, prod_id){
+    /* async updateProductInCart(cart_id, prod_id){
 
         try {
             //  Buscar el Cart
@@ -93,6 +94,43 @@ class CartManager{
                 await fs.writeFile(this.path, JSON.stringify(this.carts));
                 console.log(`Producto con ID:${prod_id} agregado exitosamente al carrito ${cart_id}`);
                 return {result:`Producto con ID:${prod_id} agregado exitosamente al carrito ${cart_id}`};         
+            }
+            else{
+                return {error:"Carrito no encontrado"};
+            }
+
+        } catch (error) {
+            console.log("ERROR: "+ error);
+            return {error : error};
+        }        
+    } */
+
+    async updateProductInCart(cart_id, prod_id){
+
+        try {
+            //  Buscar el Cart
+            const cart_encontrado = await cartModel.findById(cart_id);
+
+            if(cart_encontrado){
+                let cart_index = cart_encontrado.findIndex((cart => cart.id === cart_id));
+
+                //  Buscar el producto
+                const prod_encontrado = cart_encontrado[cart_index].products.find(prod=> prod.id === prod_id);
+
+
+                // Si lo encuentra Aumentar cantidad
+                if(prod_encontrado){
+                    let prod_index = cart_encontrado[cart_index].products.findIndex((prod => prod.id === prod_id));
+                    let quantity = cart_encontrado[cart_index].products[prod_index].quantity;
+                    cart_encontrado[cart_index].products[prod_index] = {id: prod_id, quantity: quantity+1}
+
+                }// Si no agregarlo al carrito
+                else{
+                    cart_encontrado[cart_index].products.push({id:prod_id, quantity:1});
+                }
+    
+                //2. Guarda en DB
+                await await cartModel.updateOne({_id:cart_encontrado.id}, {$set:cart_encontrado})        
             }
             else{
                 return {error:"Carrito no encontrado"};

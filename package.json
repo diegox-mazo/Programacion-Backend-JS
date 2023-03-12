@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "start-nodemon": "nodemon app.js",
+    "start": "node src/app.js",
+    "start-nodemon": "cross-env NODE_ENV=development nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,11 +20,14 @@
   },
   "homepage": "https://github.com/diegox-mazo/Programacion-Backend-JS#readme",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^2.0.20"
   },
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-handlebars": "^6.0.7",
+    "mongoose": "^7.0.1",
     "socket.io": "^4.6.1"
   }
 }
