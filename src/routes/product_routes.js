@@ -25,17 +25,25 @@ router.get("/insertion", async (request,response)=>{
     }    
 });
 
-
-//  /api/products/   ?limit=4
+//  (Obtener ListdoProductos)
+//  /api/products/ ?limit=4 & ?page=1 & category= & status=  $ sort=asc/desc     
 router.get("/", async (request,response)=>{
     
     try {
-        let limit = Number(request.query.limit);
-        if(!limit || isNaN(limit)){
-            limit = null;
-        }
+        const {limit = 10} = request.query;
+
+        const {page=1} = request.query;
+
+        const{category=null} = request.query;
+
+        const{status=null} = request.query;
+
+        const{sort=null} = request.query;
+
+
         // let productos_list = await product_manager.getProducts();  --> File
-        let productos_list = await productModel.find().limit(limit)// MongoDB
+        //let productos_list = await productModel.find().limit(limit)// MongoDB
+        let productos_list = await productModel.paginate({$or:[{category:`${category}`},{status:`${status}`}]}, {limit:limit, page:page, sort:{price:sort}});
 
         /* if(!limit || isNaN(limit) || limit>productos_list.length){
             return response.json({productos_list});

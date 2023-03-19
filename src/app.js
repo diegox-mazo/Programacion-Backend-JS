@@ -37,10 +37,10 @@ app.use(`/${BASE_URL}/carts`, cartRoutes);
 
 //-------------------VIEWS ROUTES------------------------------
 // /  (index)
-app.use(`/`, viewRoutes);
+app.use(`/views`, viewRoutes);
 
 // /realtimeproducts
-app.use(`/`, viewRoutes);
+app.use(`/views`, viewRoutes);
 
 
 //------------------SERVER  with WEB-SOCKETS------------------------------
