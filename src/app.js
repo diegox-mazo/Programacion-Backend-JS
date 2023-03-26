@@ -1,11 +1,16 @@
 const express = require("express");
+const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 const handlebars = require("express-handlebars");
+const session = require("express-session");
+const mongoStore = require("connect-mongo");
+
 const productRoutes = require("./routes/product_routes");
 const cartRoutes = require("./routes/cart_routes");
 const viewRoutes = require("./routes/views.router");
 const path = require("path");
 const {Server} = require("socket.io");
-const mongoose = require("mongoose");
+
 const {DB_PASSWORD} = require("./config/config.js")// variable de entorno
 
 const PORT = 8080;
@@ -15,6 +20,19 @@ const BASE_URL = "api";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+app.use(cookieParser());
+app.use(
+    session({
+    store: mongoStore.create({
+    mongoUrl: `mongodb+srv://CoderUser:${DB_PASSWORD}@codercluster.fu6rpdy.mongodb.net/?retryWrites=true&w=majority`,
+    mongoOptions: { useNewUrlParser: true, useUnifiedTopology: true },
+    ttl: 60 * 3600,
+    }),
+    secret: "secretSession", //TODO variable entorno
+    resave: false,
+    saveUninitialized: false,
+    })
+);
 
 //CONFIGURAR RECURSOS STATIC
 app.use('/static', express.static(`${__dirname}/public`));
@@ -41,6 +59,9 @@ app.use(`/views`, viewRoutes);
 
 // /realtimeproducts
 app.use(`/views`, viewRoutes);
+
+// /api/session/
+app.use("/api/session/", sessionRoutes);
 
 
 //------------------SERVER  with WEB-SOCKETS------------------------------
