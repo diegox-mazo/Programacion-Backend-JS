@@ -1,4 +1,4 @@
-const {config}= require("dotenv");
+const { config } = require("dotenv");
 
 config({ path: `.env.${process.env.NODE_ENV || "development"}.local` });
 
@@ -12,6 +12,10 @@ const {
     DB_NAME,
     DB_PASSWORD,
     DB_USER,
+    GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET,
+    GITHUB_CALLBACK_URL,
+
 } = process.env;
 
 module.exports = {
@@ -24,4 +28,7 @@ module.exports = {
     DB_NAME,
     DB_PASSWORD,
     DB_USER,
+    GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET,
+    GITHUB_CALLBACK_URL,
 };

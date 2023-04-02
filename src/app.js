@@ -4,7 +4,10 @@ const cookieParser = require("cookie-parser");
 const handlebars = require("express-handlebars");
 const session = require("express-session");
 const mongoStore = require("connect-mongo");
+const passport = require('passport');
+const initializePassport = require("./config/passport.config");
 
+const sessionRoutes = require("./routes/session.routes");
 const productRoutes = require("./routes/product_routes");
 const cartRoutes = require("./routes/cart_routes");
 const viewRoutes = require("./routes/views.router");
@@ -24,7 +27,7 @@ app.use(cookieParser());
 app.use(
     session({
     store: mongoStore.create({
-    mongoUrl: `mongodb+srv://CoderUser:${DB_PASSWORD}@codercluster.fu6rpdy.mongodb.net/?retryWrites=true&w=majority`,
+    mongoUrl: `mongodb+srv://CoderUser:${DB_PASSWORD}@codercluster.fu6rpdy.mongodb.net/?retryWrites=true&w=majority`, //TODO convertir a variable de entorno
     mongoOptions: { useNewUrlParser: true, useUnifiedTopology: true },
     ttl: 60 * 3600,
     }),
@@ -33,6 +36,10 @@ app.use(
     saveUninitialized: false,
     })
 );
+
+//  PASSPORT
+initializePassport();
+app.use(passport.initialize())
 
 //CONFIGURAR RECURSOS STATIC
 app.use('/static', express.static(`${__dirname}/public`));

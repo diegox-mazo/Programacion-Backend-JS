@@ -1,5 +1,8 @@
 const { Router } = require("express");
 const userModel = require("../models/user.model");
+const { createHashValue, isValidPasswd } = require("../utils/encrypt");
+const passport = require("passport");
+
 
 const router = Router();
 
@@ -17,11 +20,14 @@ router.post("/login", async (req, res) => {
         const usuario = await userModel.findOne({ email });
 
         if (!usuario) {
-            return res.json({ message: `este usuario no esta registrado` });
+            return res.status(401).json({ message: `este usuario no esta registrado` });
         }
 
-        if (usuario.password !== password) {
-            return res.json({ message: `password incorrecto` });
+        //TODO dencrypt
+        const isValidPassword = await isValidPasswd(password, usuario.password);
+
+        if (!isValidPassword) {
+            return res.status(401).json({ message: `password incorrecto` });
         }
 
         req.session.user = {
@@ -44,14 +50,64 @@ router.post("/register", async (req, res) => {
 
         const { first_name, last_name, email, age, password } = req.body;
 
-        const userAdd = { email, password, first_name, last_name, age, password };
+        //TODO encrypt
+        const passwordHashed = await createHashValue(password);
+
+        const userAdd = { email, password, first_name, last_name, age, password: passwordHashed };
         const newUser = await userModel.create(userAdd);
 
         req.session.user = { email, first_name, last_name, age };
-        return res.render(`login`,{user: newUser} );
+        return res.render(`login`, { user: newUser });
     } catch (error) {
         console.log(error);
     }
 });
+
+router.post("/recover-psw", async (req, res) => {
+    try {
+
+        const { new_password, email } = req.body;
+
+        const newPswHashed = await createHashValue(new_password);
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res
+                .status(401)
+                .json({ message: `credenciales invalidas o erroneas` });
+        }
+
+        const updateUser = await userModel.findByIdAndUpdate(user._id, {
+            password: newPswHashed,
+        });
+
+        if (!updateUser) {
+            res.json({ message: "problemas actualizando la contrasena" });
+        }
+
+        return res.render(`login`);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.get(
+    "/github",
+    passport.authenticate("github", { scope: ["user:email"] }),
+    async (req, res) => { }
+);
+
+router.get(
+    "/github/callback",
+    passport.authenticate("github", { failureRedirect: "/login" }),
+    async (req, res) => {
+        try {
+            req.session.user = req.user;
+            res.redirect("/profile");
+        } catch (error) {
+            console.log( error);
+        }
+    }
+);
 
 module.exports = router;
